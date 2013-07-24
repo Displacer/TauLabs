@@ -39,7 +39,7 @@
 
 /* Private constants */
 #define MPU9150_TASK_PRIORITY	(tskIDLE_PRIORITY + configMAX_PRIORITIES - 1)	// max priority
-#define MPU9150_TASK_STACK		(484 / 4)
+#define MPU9150_TASK_STACK		(512 / 4)
 
 #define MPU9150_WHOAMI_ID        0x68
 #define MPU9150_MAG_ADDR         0x0c
@@ -50,6 +50,7 @@
 #define MPU9150_MAG_YL           0x06
 #define MPU9150_MAG_ZH           0x07
 #define MPU9150_MAG_ZL           0x08
+#define MPU9150_MAG_STATUS2      0x09
 #define MPU9150_MAG_CNTR         0x0a
 
 /* Global Variables */
@@ -163,9 +164,12 @@ int32_t PIOS_MPU9150_Init(uint32_t i2c_id, uint8_t i2c_addr, const struct pios_m
 	/* Set up EXTI line */
 	PIOS_EXTI_Init(cfg->exti_cfg);
 
-	//Wait 5 ms for data ready interrupt
-	if (xSemaphoreTake(dev->data_ready_sema, 5) != pdTRUE)
-		return -233;
+	// Wait 5 ms for data ready interrupt and make sure it happens
+	// twice
+	if ((xSemaphoreTake(dev->data_ready_sema, 5) != pdTRUE) ||
+		(xSemaphoreTake(dev->data_ready_sema, 5) != pdTRUE)) {
+		return -10;
+	}
 
 	int result = xTaskCreate(PIOS_MPU9150_Task, (const signed char *)"PIOS_MPU9150_Task",
 						 MPU9150_TASK_STACK, NULL, MPU9150_TASK_PRIORITY,
@@ -191,11 +195,9 @@ static int32_t PIOS_MPU9150_Config(struct pios_mpu60x0_cfg const * cfg)
 	if (PIOS_MPU9150_SetReg(PIOS_MPU60X0_PWR_MGMT_REG, PIOS_MPU60X0_PWRMGMT_IMU_RST) != 0)
 		return -1;
 
-	// Reset sensors signal path
-	PIOS_MPU9150_SetReg(PIOS_MPU60X0_USER_CTRL_REG, PIOS_MPU60X0_USERCTL_GYRO_RST);
-
 	// Give chip some time to initialize
-	PIOS_DELAY_WaitmS(10);
+	PIOS_DELAY_WaitmS(50);
+	PIOS_WDG_Clear();
 
 	//Power management configuration
 	PIOS_MPU9150_SetReg(PIOS_MPU60X0_PWR_MGMT_REG, cfg->Pwr_mgmt_clk);
@@ -221,7 +223,20 @@ static int32_t PIOS_MPU9150_Config(struct pios_mpu60x0_cfg const * cfg)
 
 	// To enable access to the mag on auxillary i2c we must set bit 0x02 in register 0x37
 	// and clear bit 0x40 in register 0x6a (PIOS_MPU60X0_USER_CTRL_REG, default condition)
-	PIOS_MPU9150_Mag_SetReg(MPU9150_MAG_CNTR, 0x01);
+	
+	// Disable mag first
+	if (PIOS_MPU9150_Mag_SetReg(MPU9150_MAG_CNTR, 0x00) != 0)
+		return -1;
+	PIOS_DELAY_WaitmS(20);
+	PIOS_WDG_Clear();
+	// Clear status registers
+	PIOS_MPU9150_Mag_GetReg(MPU9150_MAG_STATUS);
+	PIOS_MPU9150_Mag_GetReg(MPU9150_MAG_STATUS2);
+	PIOS_MPU9150_Mag_GetReg(MPU9150_MAG_XH);
+
+	// Trigger first measurement
+	if (PIOS_MPU9150_Mag_SetReg(MPU9150_MAG_CNTR, 0x01) != 0)
+		return -1;
 
 	// Interrupt enable
 	PIOS_MPU9150_SetReg(PIOS_MPU60X0_INT_EN_REG, cfg->interrupt_en);

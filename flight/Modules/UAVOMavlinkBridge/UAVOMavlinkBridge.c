@@ -165,46 +165,46 @@ static void uavoMavlinkBridgeTask(void *parameters) {
 	}
 
 	if (GPSPositionHandle() == NULL ){
-		gpsPosData.Altitude=0;
-		gpsPosData.GeoidSeparation=0;
-		gpsPosData.Groundspeed=0;
-		gpsPosData.HDOP=0;
-		gpsPosData.Heading=0;
-		gpsPosData.Latitude=0;
-		gpsPosData.Longitude=0;
-		gpsPosData.PDOP=0;
-		gpsPosData.Satellites=0;
-		gpsPosData.Status=0;
-		gpsPosData.VDOP=0;
+		gpsPosData.Altitude = 0;
+		gpsPosData.GeoidSeparation = 0;
+		gpsPosData.Groundspeed = 0;
+		gpsPosData.HDOP = 0;
+		gpsPosData.Heading = 0;
+		gpsPosData.Latitude = 0;
+		gpsPosData.Longitude = 0;
+		gpsPosData.PDOP = 0;
+		gpsPosData.Satellites = 0;
+		gpsPosData.Status = 0;
+		gpsPosData.VDOP = 0;
 	}
 
 	if (FlightBatteryStateHandle() == NULL ) {
-		batState.AvgCurrent=0;
-		batState.BoardSupplyVoltage=0;
-		batState.ConsumedEnergy=0;
-		batState.Current=0;
-		batState.EstimatedFlightTime=0;
-		batState.PeakCurrent=0;
-		batState.Voltage=0;
+		batState.AvgCurrent = 0;
+		batState.BoardSupplyVoltage = 0;
+		batState.ConsumedEnergy = 0;
+		batState.Current = 0;
+		batState.EstimatedFlightTime = 0;
+		batState.PeakCurrent = 0;
+		batState.Voltage = 0;
 	}
 
 	if (AirspeedActualHandle() == NULL ) {
-		airspeedActual.CalibratedAirspeed=0;
-		airspeedActual.TrueAirspeed=0;
-		airspeedActual.alpha=0;
-		airspeedActual.beta=0;
+		airspeedActual.CalibratedAirspeed = 0;
+		airspeedActual.TrueAirspeed = 0;
+		airspeedActual.alpha = 0;
+		airspeedActual.beta = 0;
 	}
 
 	if (HomeLocationHandle() == NULL ) {
 		homeLocation.Set=HOMELOCATION_SET_FALSE;
-		homeLocation.Latitude=0;
-		homeLocation.Longitude=0;
-		homeLocation.Altitude=0;
-		homeLocation.Be[0]=0;
-		homeLocation.Be[1]=0;
-		homeLocation.Be[2]=0;
-		homeLocation.GroundTemperature=15;
-		homeLocation.SeaLevelPressure=1013;
+		homeLocation.Latitude = 0;
+		homeLocation.Longitude = 0;
+		homeLocation.Altitude = 0;
+		homeLocation.Be[0] = 0;
+		homeLocation.Be[1] = 0;
+		homeLocation.Be[2] = 0;
+		homeLocation.GroundTemperature = (STANDARD_AIR_TEMPERATURE - CELSIUS2KELVIN) * 10;
+		homeLocation.SeaLevelPressure = STANDARD_AIR_SEA_LEVEL_PRESSURE/1000;
 	}
 
 	uint16_t msg_length;
@@ -213,7 +213,7 @@ static void uavoMavlinkBridgeTask(void *parameters) {
 	lastSysTime = xTaskGetTickCount();
 
 	while (1) {
-		vTaskDelayUntil(&lastSysTime, (1000 / TASK_RATE_HZ) / portTICK_RATE_MS);
+		vTaskDelayUntil(&lastSysTime, MS2TICKS(1000 / TASK_RATE_HZ));
 
 		if (stream_trigger(MAV_DATA_STREAM_EXTENDED_STATUS)) {
 			if (FlightBatteryStateHandle() != NULL )
@@ -221,16 +221,19 @@ static void uavoMavlinkBridgeTask(void *parameters) {
 			SystemStatsGet(&systemStats);
 
 			int8_t battery_remaining = 0;
-			if (batSettings.Capacity != 0)
-				battery_remaining = batState.ConsumedEnergy / batSettings.Capacity * 100;
+			if (batSettings.Capacity != 0) {
+				if (batState.ConsumedEnergy < batSettings.Capacity) {
+					battery_remaining = 100 - lroundf(batState.ConsumedEnergy / batSettings.Capacity * 100);
+				}
+			}
 
 			uint16_t voltage = 0;
 			if (batSettings.SensorType[FLIGHTBATTERYSETTINGS_SENSORTYPE_BATTERYVOLTAGE] == FLIGHTBATTERYSETTINGS_SENSORTYPE_ENABLED)
-				voltage = batState.Voltage * 1000;
+				voltage = lroundf(batState.Voltage * 1000);
 
 			uint16_t current = 0;
 			if (batSettings.SensorType[FLIGHTBATTERYSETTINGS_SENSORTYPE_BATTERYCURRENT] == FLIGHTBATTERYSETTINGS_SENSORTYPE_ENABLED)
-				voltage = batState.Current * 100;
+				current = lroundf(batState.Current * 100);
 
 			mavlink_msg_sys_status_pack(0, 200, &mavMsg,
 					// onboard_control_sensors_present Bitmask showing which onboard controllers and sensors are present. Value of 0: not present. Value of 1: present. Indices: 0: 3D gyro, 1: 3D acc, 2: 3D mag, 3: absolute pressure, 4: differential pressure, 5: GPS, 6: optical flow, 7: computer vision position, 8: laser based position, 9: external ground-truth (Vicon or Leica). Controllers: 10: 3D angular rate control 11: attitude stabilization, 12: yaw position, 13: z/altitude control, 14: x/y position control, 15: motor outputs / control

@@ -90,9 +90,18 @@ public:
                             BOARD_CAPABILITIES_MAGS, BOARD_CAPABILITIES_BAROS,
                             BOARD_CAPABILITIES_RADIO};
     /**
-     * Query capabilities of the board
+     * @brief Query capabilities of the board.
+     * @return true if board supports the capability that is requested (from BoardCapabilities)
+     *
      */
     virtual bool queryCapabilities(BoardCapabilities capability) = 0;
+
+    /**
+     * @brief Query number & names of output PWM channels banks on the board
+     * @return list of channel bank names
+     *
+     */
+    virtual QStringList queryChannelBanks() { return QStringList(); }
 
     /**
      * @brief getBoardPicture
@@ -112,9 +121,8 @@ public:
     virtual QStringList getSupportedProtocols() = 0;
 
     /**
-     * Get supported protocol(s) for this board
+     * Get name of the HW Configuration UAVObject
      *
-     * TODO: extend GCS to support multiple protocol types.
      */
     virtual QString getHwUAVO() = 0;
 
@@ -135,6 +143,44 @@ public:
 
     //! Get the board type number
     int getBoardType() { return boardType; }
+
+    /***** methods related to configuring specific boards *****/
+
+    //! Types of input to configure for the default port
+    enum InputType {
+        INPUT_TYPE_DISABLED,
+        INPUT_TYPE_PWM,
+        INPUT_TYPE_PPM,
+        INPUT_TYPE_DSM2,
+        INPUT_TYPE_DSMX10BIT,
+        INPUT_TYPE_DSMX11BIT,
+        INPUT_TYPE_SBUS,
+        INPUT_TYPE_UNKNOWN
+    };
+
+    //! Determine if this board supports configuring the receiver
+    virtual bool isInputConfigurationSupported() { return false; }
+
+    /**
+     * @brief Configure the board to use an receiver input type on a port number
+     * @param type the type of receiver to use
+     * @param port_num which input port to configure (board specific numbering)
+     * @return true if successfully configured or false otherwise
+     */
+    virtual bool setInputOnPort(enum InputType /*type*/, int port_num = 0) { Q_UNUSED(port_num); return false; }
+
+    /**
+     * @brief getInputOnPort get the current input type
+     * @param port_num which input port to query (board specific numbering)
+     * @return the currently selected input type
+     */
+    virtual enum InputType getInputOnPort(int port_num = 0) { Q_UNUSED(port_num); return INPUT_TYPE_UNKNOWN; }
+
+    /**
+     * @brief getConnectionDiagram get the connection diagram for this board
+     * @return a string with the name of the resource for this board diagram
+     */
+    virtual QString getConnectionDiagram() { return ""; }
 
 signals:
 

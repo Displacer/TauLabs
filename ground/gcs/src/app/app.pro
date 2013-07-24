@@ -6,9 +6,13 @@ TARGET = $$GCS_APP_TARGET
 DESTDIR = $$GCS_APP_PATH
 QT += xml
 QT += widgets
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    customsplash.cpp
+
 include(../rpath.pri)
 include(../libs/utils/utils.pri)
+
+HEADERS += customsplash.h
 
 LIBS *= -l$$qtLibraryName(ExtensionSystem) -l$$qtLibraryName(Aggregation)
 
@@ -31,10 +35,11 @@ win32 {
     INSTALLS    += target
 }
 
-OTHER_FILES += taulabs.rc
-
-OTHER_FILES += qtcreator.rc \
+OTHER_FILES += taulabs.rc \
+    qtcreator.rc \
     Info.plist.in \
     $$PWD/app_version.h.in
 
 QMAKE_SUBSTITUTES += $$PWD/app_version.h.in
+RESOURCES += \
+    app_resource.qrc

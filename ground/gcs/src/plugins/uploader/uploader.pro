@@ -4,7 +4,7 @@ DEFINES += UPLOADER_LIBRARY
 QT += svg
 
 include(uploader_dependencies.pri)
-INCLUDEPATH += ../../libs/qextserialport/src
+INCLUDEPATH *= ../../libs/qextserialport/src
 
 HEADERS += uploadergadget.h \
     uploadergadgetconfiguration.h \
@@ -45,6 +45,10 @@ FORMS += \
 
 RESOURCES += \
     uploader.qrc
-exists( ../../../../../build/ground/tlfw_resource/tlfw_resource.qrc ) {
-RESOURCES += ../../../../../build/ground/tlfw_resource/tlfw_resource.qrc
+
+exists(../../../../../build/ground/tlfw_resource/tlfw_resource.qrc ) {
+    RESOURCES += ../../../../../build/ground/tlfw_resource/tlfw_resource.qrc
+} else {
+    message("tlfw_resource.qrc not found.  Automatically firmware updates disabled.")
 }
+

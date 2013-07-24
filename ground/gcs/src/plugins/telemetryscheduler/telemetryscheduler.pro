@@ -30,6 +30,3 @@ OTHER_FILES += telemetryscheduler.json
 FORMS += telemetryscheduler.ui
 FORMS += metadata_dialog.ui
 
-RESOURCES += telemetryscheduler.qrc
-
-

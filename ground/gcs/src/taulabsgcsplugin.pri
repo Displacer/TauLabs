@@ -7,7 +7,7 @@ CONFIG       += plugin
 QT += widgets
 DESTDIR = $$GCS_PLUGIN_PATH/$$PROVIDER
 LIBS += -L$$DESTDIR
-INCLUDEPATH += $$GCS_SOURCE_TREE/src/plugins
+INCLUDEPATH *= $$GCS_SOURCE_TREE/src/plugins
 DEPENDPATH += $$GCS_SOURCE_TREE/src/plugins
 
 # copy the plugin spec

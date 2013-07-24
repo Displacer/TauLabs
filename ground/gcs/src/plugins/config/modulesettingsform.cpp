@@ -113,29 +113,29 @@ ModuleSettingsForm::ModuleSettingsForm(QWidget *parent, QPushButton *saveButton,
 
     // Set text properties for checkboxes. The second argument is the UAVO field that corresponds
     // to the checkbox's true (respectively, false) state.
-    moduleSettingsWidget->gb_Airspeed->setProperty(trueString.toAscii(), "Enabled");
-    moduleSettingsWidget->gb_Airspeed->setProperty(falseString.toAscii(), "Disabled");
+    moduleSettingsWidget->gb_Airspeed->setProperty(trueString.toLatin1(), "Enabled");
+    moduleSettingsWidget->gb_Airspeed->setProperty(falseString.toLatin1(), "Disabled");
 
-    moduleSettingsWidget->gb_Battery->setProperty(trueString.toAscii(), "Enabled");
-    moduleSettingsWidget->gb_Battery->setProperty(falseString.toAscii(), "Disabled");
+    moduleSettingsWidget->gb_Battery->setProperty(trueString.toLatin1(), "Enabled");
+    moduleSettingsWidget->gb_Battery->setProperty(falseString.toLatin1(), "Disabled");
 
-    moduleSettingsWidget->gb_ComBridge->setProperty(trueString.toAscii(), "Enabled");
-    moduleSettingsWidget->gb_ComBridge->setProperty(falseString.toAscii(), "Disabled");
+    moduleSettingsWidget->gb_ComBridge->setProperty(trueString.toLatin1(), "Enabled");
+    moduleSettingsWidget->gb_ComBridge->setProperty(falseString.toLatin1(), "Disabled");
 
-    moduleSettingsWidget->gb_GPS->setProperty(trueString.toAscii(), "Enabled");
-    moduleSettingsWidget->gb_GPS->setProperty(falseString.toAscii(), "Disabled");
+    moduleSettingsWidget->gb_GPS->setProperty(trueString.toLatin1(), "Enabled");
+    moduleSettingsWidget->gb_GPS->setProperty(falseString.toLatin1(), "Disabled");
 
-    moduleSettingsWidget->gb_OveroSync->setProperty(trueString.toAscii(), "Enabled");
-    moduleSettingsWidget->gb_OveroSync->setProperty(falseString.toAscii(), "Disabled");
+    moduleSettingsWidget->gb_OveroSync->setProperty(trueString.toLatin1(), "Enabled");
+    moduleSettingsWidget->gb_OveroSync->setProperty(falseString.toLatin1(), "Disabled");
 
-    moduleSettingsWidget->gb_VibrationAnalysis->setProperty(trueString.toAscii(), "Enabled");
-    moduleSettingsWidget->gb_VibrationAnalysis->setProperty(falseString.toAscii(), "Disabled");
+    moduleSettingsWidget->gb_VibrationAnalysis->setProperty(trueString.toLatin1(), "Enabled");
+    moduleSettingsWidget->gb_VibrationAnalysis->setProperty(falseString.toLatin1(), "Disabled");
 
-    moduleSettingsWidget->gb_measureVoltage->setProperty(trueString.toAscii(), "Enabled");
-    moduleSettingsWidget->gb_measureVoltage->setProperty(falseString.toAscii(), "Disabled");
+    moduleSettingsWidget->gb_measureVoltage->setProperty(trueString.toLatin1(), "Enabled");
+    moduleSettingsWidget->gb_measureVoltage->setProperty(falseString.toLatin1(), "Disabled");
 
-    moduleSettingsWidget->gb_measureCurrent->setProperty(trueString.toAscii(), "Enabled");
-    moduleSettingsWidget->gb_measureCurrent->setProperty(falseString.toAscii(), "Disabled");
+    moduleSettingsWidget->gb_measureCurrent->setProperty(trueString.toLatin1(), "Enabled");
+    moduleSettingsWidget->gb_measureCurrent->setProperty(falseString.toLatin1(), "Disabled");
 
     // Refresh widget contents
     refreshWidgetsValues();
@@ -251,6 +251,7 @@ void ModuleSettingsForm::toggleVibrationTest()
 
 void ModuleSettingsForm::updatePitotType(int comboboxValue)
 {
+    Q_UNUSED(comboboxValue)
 
 //    AirspeedSettings *airspeedSettings;
 //    airspeedSettings = AirspeedSettings::GetInstance(getObjectManager());
